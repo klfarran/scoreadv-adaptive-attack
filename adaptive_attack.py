@@ -93,9 +93,14 @@ def evaluate(model, x, x_adv, y, device, threshold=0.5):
         
         prob_D = F.softmax(logits_D_adv, dim=1)
         prob_C = F.softmax(logits_C_adv, dim=1)
+        
+        #argmax accuracy 
+        pred_D = logits_D_adv.argmax(dim=1)
+        acc_argmax = (pred_D == y).float().mean().item()
+        
+        # confidence-based accuracy 
         true_class_prob = prob_D.gather(1, y.unsqueeze(1)).squeeze()
-        # classification accuracy 
-        acc_D = (true_class_prob > threshold).float().mean().item()
+        confidence_true_class_rate = (true_class_prob > threshold).float().mean().item()
         
         #detector "clean" confidence (assumes class = 0 is clean)
         clean_prob = prob_C[:,0]
@@ -109,7 +114,8 @@ def evaluate(model, x, x_adv, y, device, threshold=0.5):
         score_mse = F.mse_loss(adv_scores, clean_scores).item()
         
     return {
-        "classification_accuracy": acc_D,
+        "classification_accuracy_argmax": acc_argmax,
+        "confidence_true_class_rate": confidence_true_class_rate,
         "attack_success": success_rate,
         "img_mse": img_mse,
         "score_mse": score_mse
@@ -153,6 +159,7 @@ def run_experiment(
 
     acc_clean_total = 0
     acc_adv_total = 0
+    conf_adv_total = 0
     success_total = 0
     img_mse_total = 0
     score_mse_total = 0
@@ -182,8 +189,9 @@ def run_experiment(
         all_adv.append(x_adv.cpu())
         all_labels.append(y.cpu())
 
-        acc_clean_total += metrics_clean["classification_accuracy"]
-        acc_adv_total += metrics_adv["classification_accuracy"]
+        acc_clean_total += metrics_clean["classification_accuracy_argmax"]
+        conf_adv_total += metrics_adv["confidence_true_class_rate"]
+        acc_adv_total += metrics_adv["classification_accuracy_argmax"]
         success_total += metrics_adv["attack_success"]
         img_mse_total += metrics_adv["img_mse"]
         score_mse_total += metrics_adv["score_mse"]
@@ -191,8 +199,9 @@ def run_experiment(
         n_batches += 1
         
     results = {
-        "clean_acc": acc_clean_total / n_batches,
-        "adv_acc": acc_adv_total / n_batches,
+        "clean_acc_argmax": acc_clean_total / n_batches,
+        "adv_acc_argmax": acc_adv_total / n_batches,
+        "adv_confidence_true_class": conf_adv_total / n_batches,
         "attack_success": success_total / n_batches,
         "img_mse": img_mse_total / n_batches,
         "score_mse": score_mse_total / n_batches
