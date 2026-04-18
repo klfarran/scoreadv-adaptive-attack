@@ -1,3 +1,4 @@
+import os
 import torch
 import torch.nn.functional as F
 from torch.utils.data import DataLoader, Subset
@@ -189,15 +190,38 @@ def run_experiment(
 
         n_batches += 1
         
-    print("\n===== RESULTS =====")
-    print(f"Clean Accuracy (D): {acc_clean_total / n_batches:.4f}")
-    print(f"Adv Accuracy (D):   {acc_adv_total / n_batches:.4f}")
-    print(f"Attack Success:     {success_total / n_batches:.4f}")
-    print(f"Image MSE:          {img_mse_total / n_batches:.6f}")
-    print(f"Score MSE:          {score_mse_total / n_batches:.6f}")
+    results = {
+        "clean_acc": acc_clean_total / n_batches,
+        "adv_acc": acc_adv_total / n_batches,
+        "attack_success": success_total / n_batches,
+        "img_mse": img_mse_total / n_batches,
+        "score_mse": score_mse_total / n_batches
+    }
     
+    #print results
+    print("\n===== RESULTS =====")
+    for k, v in results.items():
+        print(f"{k}: {v:.6f}")
+     
+    # save results   
+    os.makedirs("results", exist_ok=True)
+    txt_path = f"results/adaptive_attack_results.txt"
+    with open(txt_path, "w") as f:
+        f.write("===== RESULTS =====\n")
+        for k, v in results.items():
+            f.write(f"{k}: {v:.6f}\n")
+
+    print(f"Saved results to: {txt_path}")
+    
+    
+    # save adversarial dataset
     adv_dataset = torch.cat(all_adv)
     labels = torch.cat(all_labels)
+    
+    torch.save({
+        "adv_data": adv_dataset,
+        "labels": labels
+    }, f"results/adaptive_attack_dataset.pt")
 
     return adv_dataset, labels
 

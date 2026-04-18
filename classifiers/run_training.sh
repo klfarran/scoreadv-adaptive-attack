@@ -1,7 +1,7 @@
 #!/bin/bash
-#SBATCH --job-name=classifier_A
-#SBATCH --output=logs/job_A.out
-#SBATCH --error=error/job_A.err
+#SBATCH --job-name=classifier_C
+#SBATCH --output=logs/job_C.out
+#SBATCH --error=error/job_C.err
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
 #SBATCH --gres=gpu:1
