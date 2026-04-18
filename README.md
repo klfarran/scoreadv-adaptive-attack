@@ -89,5 +89,5 @@ _adaptive_attack.py_
 
 
 
-
+&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;<img src="diagrams/attack-loop.png" width="400" height="700"/>
 
