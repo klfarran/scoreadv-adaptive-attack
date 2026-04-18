@@ -6,7 +6,7 @@
 #SBATCH --ntasks=1
 #SBATCH --gres=gpu:1
 #SBATCH --mem=32G
-#SBATCH --time=0-08:00
+#SBATCH --time=0-16:00
 #SBATCH --partition=gpu
 #SBATCH -A aisecurity
 

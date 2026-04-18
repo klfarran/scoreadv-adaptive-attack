@@ -263,7 +263,7 @@ if __name__ == "__main__":
         score_indices=(6, 3, 0)
     ).to(device)
 
-    # ---- run experiment ----
+    # run experiment 
     adv_data, labels = run_experiment(
         model=model,
         transform=transform,
