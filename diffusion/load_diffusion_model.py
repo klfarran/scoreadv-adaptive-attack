@@ -1,15 +1,15 @@
 def load_diff_model(ckpt_path, device):
     import numpy as np
 
-    from configs.ve import cifar10_ncsnpp_deep_continuous as configs
-    from models import utils as mutils
-    from models.ema import ExponentialMovingAverage
-    from losses import get_optimizer
-    from utils import restore_checkpoint
+    from diffusion.configs.ve import cifar10_ncsnpp_deep_continuous as configs
+    from diffusion.models import utils as mutils
+    from diffusion.models.ema import ExponentialMovingAverage
+    from diffusion.losses import get_optimizer
+    from diffusion.utils import restore_checkpoint
 
     # config
     config = configs.get_config()
-    config.device = device
+    #config.device = str(device)
 
     # build model
     diff_model = mutils.create_model(config)

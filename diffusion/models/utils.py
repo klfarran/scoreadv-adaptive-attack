@@ -17,9 +17,9 @@
 """
 
 import torch
-import sde_lib
+from diffusion import sde_lib
 import numpy as np
-
+#from diffusion.models import ncsnpp
 
 _MODELS = {}
 

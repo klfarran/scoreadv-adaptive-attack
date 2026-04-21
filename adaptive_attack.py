@@ -147,7 +147,7 @@ def run_experiment(
         subset,
         batch_size=batch_size,
         shuffle=False,
-        num_workers=4,
+        num_workers=1,
         pin_memory=True
     )
     
@@ -245,8 +245,23 @@ if __name__ == "__main__":
 
     score_model, noise_levels = load_diff_model(diff_ckpt, device)
     
-    classifier_C = CifarClassifier(task="adv_detect")
-    classifier_D = CifarClassifier(task="img_classify")
+    classifier_C = CifarClassifier(
+        depth=28,
+        widen_factor=5,
+        num_score_channels=9,
+        num_classes=10,
+        dropRate=0.5,
+        scores=["score6", "score3", "score0"],
+    ).to(device)
+
+    classifier_D = CifarClassifier(
+        depth=28,
+        widen_factor=5,
+        num_score_channels=9,
+        num_classes=10,
+        dropRate=0.5,
+        scores=["score6", "score3", "score0"],
+    ).to(device)
     
     classifier_C.load_state_dict(torch.load(C_ckpt, map_location=device))
     classifier_D.load_state_dict(torch.load(D_ckpt, map_location=device))

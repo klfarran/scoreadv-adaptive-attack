@@ -19,8 +19,8 @@
 import torch
 import torch.optim as optim
 import numpy as np
-from models import utils as mutils
-from sde_lib import VESDE, VPSDE
+from diffusion.models import utils as mutils
+from diffusion.sde_lib import VESDE, VPSDE
 
 
 def get_optimizer(config, params):

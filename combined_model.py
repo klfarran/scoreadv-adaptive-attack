@@ -51,7 +51,8 @@ class CombinedModel(nn.Module):
 
             # i think that we want to detatch to prevent gradients from entering the diffuion model
             # want this because we want to treat diff model as a fixed feature extractor
-            score = self.score_model(x, sigma_batch).detach()
+            with torch.no_grad():
+                score = self.score_model(x, sigma_batch).detach()
             score_maps.append(score)
 
         scores = torch.cat(score_maps, dim=1)
