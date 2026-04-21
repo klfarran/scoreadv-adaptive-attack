@@ -155,6 +155,7 @@ def run_experiment(
     model.eval()
 
     all_adv = []
+    all_clean = []
     all_labels = []
 
     acc_clean_total = 0
@@ -187,6 +188,7 @@ def run_experiment(
         metrics_adv = evaluate(model, x, x_adv, y, device)
 
         all_adv.append(x_adv.cpu())
+        all_clean.append(x.cpu())
         all_labels.append(y.cpu())
 
         acc_clean_total += metrics_clean["classification_accuracy_argmax"]
@@ -223,14 +225,20 @@ def run_experiment(
     print(f"Saved results to: {txt_path}")
     
     
-    # save adversarial dataset
+    # save adversarial + clean dataset
     adv_dataset = torch.cat(all_adv)
+    clean_dataset = torch.cat(all_clean)
     labels = torch.cat(all_labels)
     
     torch.save({
         "adv_data": adv_dataset,
         "labels": labels
-    }, f"results/adaptive_attack_dataset.pt")
+    },  "results/adv_dataset.pt")
+
+    torch.save({
+        "data": clean_dataset,
+        "labels": labels
+    },  "results/clean_dataset.pt")
 
     return adv_dataset, labels
 
