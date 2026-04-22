@@ -1,5 +1,7 @@
 # scoreadv-adaptive-attack
 
+<img src="diagrams/clean_vs_adv_examples.png">
+
 ## High level pipeline overview
 
 - 25,000 clean images from CIFAR-10 \
