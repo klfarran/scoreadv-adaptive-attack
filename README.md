@@ -15,7 +15,7 @@
 &darr; backprop with loss \
 &darr; pgd update to image (move pixels in the direction that maximizes loss) 
 
-
+<img src="diagrams/scoreadv-pipeline.png" width = 900>
 
 ## Breakdown of pipeline 
 _combined_model.py_
@@ -89,7 +89,4 @@ _adaptive_attack.py_
   - Feed to combined model the score model, classifier C, classifier D, noise levels, and the core indices (6, 3, 0)
   - Call run_experiment 
 
-
-
-&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;<img src="diagrams/attack-loop.png" width="400" height="700"/>
 
