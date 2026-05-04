@@ -1,5 +1,6 @@
 import os
 import torch
+import time
 import torch.nn.functional as F
 from torch.utils.data import DataLoader, Subset
 from torchvision import datasets, transforms
@@ -97,6 +98,8 @@ def evaluate(model, x, x_adv, y, device, threshold=0.5):
         #argmax accuracy 
         pred_D = logits_D_adv.argmax(dim=1)
         acc_argmax = (pred_D == y).float().mean().item()
+
+        pred_C = logits_C_adv.argmax(dim=1)
         
         # confidence-based accuracy 
         true_class_prob = prob_D.gather(1, y.unsqueeze(1)).squeeze()
@@ -112,11 +115,19 @@ def evaluate(model, x, x_adv, y, device, threshold=0.5):
         #mse
         img_mse = F.mse_loss(x_adv, x).item()
         score_mse = F.mse_loss(adv_scores, clean_scores).item()
+
+        #new stuff 
+        missclassification_rate = (pred_D != y).float().mean().item()
+        detector_evasion_rate = (pred_C == 0).float().mean().item()
+        joint_success = ((pred_D != y) & (pred_C == 0)).float().mean().item()
         
     return {
         "classification_accuracy_argmax": acc_argmax,
         "confidence_true_class_rate": confidence_true_class_rate,
         "attack_success": success_rate,
+        "missclassification_rate": missclassification_rate,
+        "detector_evasion_rate": detector_evasion_rate,
+        "joint_success": joint_success,
         "img_mse": img_mse,
         "score_mse": score_mse
     }
@@ -162,6 +173,9 @@ def run_experiment(
     acc_adv_total = 0
     conf_adv_total = 0
     success_total = 0
+    missclass_rate_total = 0
+    det_evasion_rate_total = 0
+    joint_success_total = 0
     img_mse_total = 0
     score_mse_total = 0
     n_batches = 0
@@ -195,6 +209,9 @@ def run_experiment(
         conf_adv_total += metrics_adv["confidence_true_class_rate"]
         acc_adv_total += metrics_adv["classification_accuracy_argmax"]
         success_total += metrics_adv["attack_success"]
+        missclass_rate_total += metrics_adv["missclassification_rate"]
+        det_evasion_rate_total += metrics_adv["detector_evasion_rate"]
+        joint_success_total += metrics_adv["joint_success"]
         img_mse_total += metrics_adv["img_mse"]
         score_mse_total += metrics_adv["score_mse"]
 
@@ -205,6 +222,9 @@ def run_experiment(
         "adv_acc_argmax": acc_adv_total / n_batches,
         "adv_confidence_true_class": conf_adv_total / n_batches,
         "attack_success": success_total / n_batches,
+        "missclassification_rate": missclass_rate_total / n_batches,
+        "detector_evasion_rate": det_evasion_rate_total / n_batches,
+        "joint_success": joint_success_total / n_batches,
         "img_mse": img_mse_total / n_batches,
         "score_mse": score_mse_total / n_batches
     }
@@ -246,6 +266,8 @@ def run_experiment(
 if __name__ == "__main__": 
     device = "cuda" if torch.cuda.is_available() else "cpu"
     
+    start_time = time.perf_counter()
+
     # load checkpoints
     diff_ckpt = "checkpoints/diffmodel_checkpoint.pth"
     C_ckpt = "checkpoints/C_adv_detect.pt"
@@ -302,3 +324,6 @@ if __name__ == "__main__":
         device=device
     )
       
+    total_time = time.perf_counter() - start_time
+    with open("results/total_runtime.txt", "w") as f:
+        f.write(f"Total runtime (seconds): {total_time:4f}\n")

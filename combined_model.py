@@ -55,10 +55,17 @@ class CombinedModel(nn.Module):
                 score = self.score_model(x, sigma_batch).detach()
             score_maps.append(score)
 
-        scores = torch.cat(score_maps, dim=1)
+        img = [[x[:, 0:1]], [x[:, 1:2]], [x[:, 2:3]]]
 
-        # build classifier input (concatenate image + scores)
-        x_in = torch.cat([x, scores], dim=1)
+        for score in score_maps:
+            img[0].append(score[:, 0:1])
+            img[1].append(score[:, 1:2])
+            img[2].append(score[:, 2:3])
+
+        x_in = torch.cat(
+            [torch.cat(img[i], dim=1) for i in range(3)],
+            dim=1
+        )
 
         # normalization tensors
         means = [self.img_mean]
@@ -81,4 +88,4 @@ class CombinedModel(nn.Module):
         logits_C = self.classifier_C(x_in)
         logits_D = self.classifier_D(x_in)
 
-        return logits_C, logits_D, scores
+        return logits_C, logits_D, torch.cat(score_maps, dim=1)
